@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <title>Mapa | Metro de Lima</title>
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Logotipo_del_Metro_de_Lima_y_Callao_%28ATU%29.svg/2064px-Logotipo_del_Metro_de_Lima_y_Callao_%28ATU%29.svg.png">
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <style>
+      body { margin: 0; padding: 0; }
+      #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+      .marker1 {
+        background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Lima_Metro_Linea_1.svg/1061px-Lima_Metro_Linea_1.svg.png');
+        background-size: cover;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .marker2 {
+        background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Lima_Metro_Linea_2_logo.svg/2048px-Lima_Metro_Linea_2_logo.svg.png');
+        background-size: cover;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .marker4 {
+        background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Lima_Metro_Linea_4_logo.svg/2048px-Lima_Metro_Linea_4_logo.svg.png');
+        background-size: cover;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .talleres {
+        background-image: url('https://cdn.icon-icons.com/icons2/556/PNG/512/train_icon-icons.com_53615.png');
+        background-size: cover;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .mapboxgl-popup {
+        max-width: 200px;
+      }
+      .mapboxgl-popup-content {
+        text-align: center;
+        font-family: 'Open Sans', sans-serif;
+      }
+
+
+      #schedule-box {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+      }
+
+      #schedule-box:hover {
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+      }
+      #extra-info {
+        margin-bottom: 20px;
+      }
+
+      a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+        #countdown {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          font-size: 20px;
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 15px;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+          transition: box-shadow 0.3s ease;
+        }
+
+        #countdown:hover {
+          box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #opening-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .status-circle {
+          width: 15px;
+          height: 15px;
+          border-radius: 50%;
+          display: inline-block;
+          margin-right: 5px; /* Ajusta el margen según sea necesario */
+          transition: background-color 0.5s ease;
+        }
+
+        .verde {
+          background-color: green;
+        }
+
+        .amarillo {
+          background-color: yellow;
+        }
+
+        .rojo {
+          background-color: red;
+        }
+
+    </style>
+  </head>
+  <body>
+    <div id='map'></div>
+    <div id="countdown"></div>
+
+    <div id="schedule-box">
+      <h1>Información Tramo 1A: Línea 2</h1>
+      <h2>Estaciones 1A - Línea 2:</h2>
+      <p>E-24 Mercado Santa Anita - No Disponible <span class="status-circle rojo"></span></p>
+      <p>E-23 Hermilio Valdizán - No Disponible <span class="status-circle rojo"></span></p>
+      <p>E-22 Colectora Industrial - No Disponible <span class="status-circle rojo"></span></p>
+      <p>E-21 Óvalo Santa Anita - No Disponible <span class="status-circle rojo"></span></p>
+      <p id="extra-info">E-20 Evitamiento - No Disponible <span class="status-circle rojo"></span></p>
+      <p><a href="https://www.metrolima2.com/" target="_blank">¿Quieres visitar la página web del metro de Lima?</a></p>
+
+      <h2>Horarios:</h2>
+      <table>
+        <tr>
+          <th>Día</th>
+          <th>Horario</th>
+        </tr>
+        <tr>
+          <td>Día Laborable</td>
+          <td>De 6 a.m. a 11 p.m.</td>
+        </tr>
+        <tr>
+          <td>Sábados</td>
+          <td>De 6 a.m. a 11 p.m.</td>
+        </tr>
+        <tr>
+          <td>Domingos y Feriados</td>
+          <td>De 6 a.m. a 11 p.m.</td>
+        </tr>
+        <tr>
+          <td>Hora Punta Mañana</td>
+          <td>7 a 9 a.m. (Día Laborable y Sábados)</td>
+        </tr>
+        <tr>
+          <td>Hora Punta Tarde</td>
+          <td>6 a 8 p.m. (Día Laborable y Domingos)</td>
+        </tr>
+      </table>
+    </div>
+
+        <!-- Countdown timer -->
+        <div id="countdown">
+            <h2>Cuenta Regresiva - Tramo 1A</h2>
+            <div id="countdown-timer"></div>
+    </div>
+
+    <script>
+      mapboxgl.accessToken = 'pk.eyJ1IjoianVsaW9jZXNhcnluZ2FmbG9yZXMyMDA0IiwiYSI6ImNsNGl4NjAxYzAxd2QzY3AwNHJ4MW4xcHQifQ.zcpzcLDTFjFk1FihS2k3yQ'; // ingresa aquí tu token de acceso de Mapbox
+      
+      // crea el mapa centrado en Perú
+      var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/satellite-streets-v12',
+        center: [-76.95623834191028, -12.051088858257273],
+        zoom: 14
+      });
+
+
+      // agrega los marcadores
+      var markers1 = [
+      	{
+          coordinates: [-76.9332605912645, -12.207443983918589],
+          content: '<h3>E-01 Villa El Salvador</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.93998176995058, -12.196208631332492],
+          content: '<h3>E-02 Parque Industrial</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.9470016616563, -12.181673645100258],
+          content: '<h3>E-03 Pumacahua</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.9503069448361, -12.169319647128244],
+          content: '<h3>E-04 Villa Maria</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.95615673995309, -12.16129562775128],
+          content: '<h3>E-05 Maria Auxiliadora</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.96584614483119, -12.15646039473913],
+          content: '<h3>E-06 San Juan</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.97955013169972, -12.150863867156081],
+          content: '<h3>E-07 Atocongo</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.99108631601253, -12.142591673749783],
+          content: '<h3>E-08 Jorge Chavez</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.99701663811105, -12.134802729959196],
+          content: '<h3>E-09 Ayacucho</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.00050964207806, -12.12729277268017],
+          content: '<h3>E-10 Cabitos</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.00034555106211, -12.110370103925977],
+          content: '<h3>E-11 Angamos</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.00175581597063, -12.10038506680699],
+          content: '<h3>E-12 San Borja Sur</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.00373546328812, -12.08670198691551],
+          content: '<h3>E-13 La Cultura</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.01111625874672, -12.074954723683744],
+          content: '<h3>E-14 Arriola</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.01227313880193, -12.065673229944972],
+          content: '<h3>E-15 Gamarra</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.01272844827297, -12.054281532700282],
+          content: '<h3>E-16 Miguel Grau</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.00969645557328, -12.046141592303751],
+          content: '<h3>E-17 El Angel</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.01160900602176, -12.041780421350031],
+          content: '<h3>E-18 Presbítero Maestro</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.01113790555684, -12.02779493029296],
+          content: '<h3>E-19 Caja de Agua</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.00267828325791, -12.01815411028009],
+          content: '<h3>E-20 Pirámide del Sol</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.0052842504723, -12.007046208399462],
+          content: '<h3>E-21 Los Jardines</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.00997494789956, -11.996100844821436],
+          content: '<h3>E-22 Los Postes</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.00676791159847, -11.984929593902091],
+          content: '<h3>E-23 San Carlos</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-77.00003622581053, -11.974667177448875],
+          content: '<h3>E-24 San Martin</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.99348431753575, -11.967934962186968],
+          content: '<h3>E-25 Santa Rosa</h3><p>Estado: En Operativo</p>'
+        },
+      	{
+          coordinates: [-76.98762410521125, -11.95968735564714],
+          content: '<h3>E-26 Bayovar</h3><p>Estado: En Operativo</p>'
+        }
+      ]
+
+      var markers2 = [
+        {
+          coordinates: [-77.13749775766439, -12.053286523087456],
+          content: '<h3>E-01 Puerto del Callao</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.12140480035404, -12.058502406586898],
+          content: '<h3>E-02 Buenos Aires</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.11489268669244, -12.057003783177038],
+          content: '<h3>E-03 Juan Pablo II</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.10275142886768, -12.054506347969493],
+          content: '<h3>E-04 Insurgentes</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.09800000009155, -12.053598682924742],
+          content: '<h3>E-05 Carmen de la Legua</h3><p>Pendiente</p>'
+        },
+        {
+          coordinates: [-77.08765174662047, -12.051611497468423],
+          content: '<h3>E-06 Óscar R. Benavides</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.07960866434601, -12.058055259578353],
+          content: '<h3>E-07 San Marcos</h3><p>Pendiente</p>'
+        },
+        {
+          coordinates: [-77.07584384828344, -12.059505611795604],
+          content: '<h3>E-08 Elio</h3><p>Pendiente</p>'
+        },
+        {
+          coordinates: [-77.06718945638619, -12.05760772868238],
+          content: '<h3>E-09 La alborada</h3><p>Pendiente</p>'
+        },
+        {
+          coordinates: [-77.0577606904498, -12.055643078096905],
+          content: '<h3>E-10 Tingo María</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.05174941343769, -12.057239605257761],
+          content: '<h3>E-11 Parque Murillo</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.04271948684462, -12.05983181602178],
+          content: '<h3>E-12 Plaza Bolognesi</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.03787213136012, -12.05982132966644],
+          content: '<h3>E-13 Central</h3><p>Estado: Pendiente</p>'
+        },
+        {
+          coordinates: [-77.03010397899978, -12.063270967576852],
+          content: '<h3>E-14 Manco Cápac</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.02126399469097, -12.06208879088409],
+          content: '<h3>E-15 Cangallo</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.01202170767625, -12.060956602576404],
+          content: '<h3>E-16 28 de Julio</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.00569109786733, -12.061292014188936],
+          content: '<h3>E-17 Nicolás Ayllón</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.99830842527513, -12.063628100506909],
+          content: '<h3>E-18 Circunvalación</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.9905508113918, -12.064262520752514],
+          content: '<h3>E-19 San Juan de Dios</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.97382900104682, -12.058563232414103],
+          content: '<h3>E-20 Evitamiento</h3><p>Estado: En Operativo</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/12/MG_1338.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.96365412703722, -12.05421688033414],
+          content: '<h3>E-21 Óvalo Santa Anita</h3><p>Estado: En Operativo</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/12/MG_1338.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.95624575936368, -12.051097921099547],
+          content: '<h3>E-22 Colectora Industrial</h3><p>Estado: En Operativo</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/12/MG_1338.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.94553849033683, -12.046834867727169],
+          content: '<h3>E-23 Hermilio Valdizán</h3><p>Estado: En Operativo</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/12/MG_1338.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.93864112019106, -12.044099646537344],
+          content: '<h3>E-24 Mercado Santa Anita</h3><p>Estado: En Operativo</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/12/MG_1338.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.93255631519678, -12.038949103192536],
+          content: '<h3>E-25 Vista Alegre</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.92616645310837, -12.031378409430506],
+          content: '<h3>E-26 Javier Prado</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.91891276246163, -12.025563979151336],
+          content: '<h3>E-27 Municipalidad de Ate</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        }
+      ];
+
+
+      // agrega los marcadores
+      var markers4 = [
+        {
+          coordinates: [-77.12540184044617, -11.997134952375054],
+          content: '<h3>E-01 Gambetta</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.11699187695167, -12.00083069969536],
+          content: '<h3>E-02 Canta Callao</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.1109720097676, -12.012162813759527],
+          content: '<h3>E-03 Boca Negra</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.10606120345898, -12.021875888295108],
+          content: '<h3>E-04 Aeropuerto</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.10291327075171, -12.028071133582305],
+          content: '<h3>E-05 El Olivar</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.09933329129339, -12.036346321963824],
+          content: '<h3>E-06 Quilca</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.09913869760328, -12.040204863531994],
+          content: '<h3>E-07 Morales Duárez</h3><p>Estado: En construcción</p><img src="https://www.metrolima2.com/wp-content/uploads/2023/03/E-01-min-scaled.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.0981221927741, -12.053570248642373],
+          content: '<h3>E-08 Carmen de la Legua</h3><p>Estado: Pendiente</p>'
+        }
+      ]
+
+
+      var taller = [
+        {
+          coordinates: [-76.93032775433043, -12.209276801357076],
+          content: '<h3>Patio taller Linea 1 (VES)</h3><p>Patio taller de la linea 1</p><img src="https://3.bp.blogspot.com/-Yv5pLQgkXc0/WnlGnpJahwI/AAAAAAAAcEg/fJn5NyVK83oS5Suz_OmEp-FrZRVjjW3JACEwYBhgL/s1600/Desarrollo%2BPeruano4.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-76.98808775074663, -11.95549130765297],
+          content: '<h3>Patio taller Linea 1 (SJL)</h3><p>Patio taller de la linea 1</p><img src="https://www.businessempresarial.com.pe/wp-content/uploads/2023/05/version-2018-303.jpg" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+      	{
+          coordinates: [-76.94222397147898, -12.04368215828341],
+          content: '<h3>Patio taller Linea 2 (Ate)</h3><p>Patio taller de la linea 2</p><img src="https://1.bp.blogspot.com/-S6xANcZPIeY/XzPC9oPplmI/AAAAAAAAofU/5V5OztnTZCw2g5PMvnu2I9Ov6JobH45RQCNcBGAsYHQ/s1600/Desarrollo%2BPeruano.png" alt="Imagen" style="width: 200px; height: 200px;">'
+        },
+        {
+          coordinates: [-77.10823980580277, -12.008402166586603],
+          content: '<h3>Patio taller Linea 4 (Callao)</h3><p>Patio taller de la linea 4</p><img src="https://1.bp.blogspot.com/-qc4BAWCKPuM/X0oOSoMNVwI/AAAAAAAAo3I/crpLa46ks7Yy-beYkVRw7t5IpOwstL9OQCNcBGAsYHQ/s1600/Desarrollo%2BPeruano.png" alt="Imagen" style="width: 200px; height: 200px;">'
+        }
+      ];
+      
+
+
+      // agrega los marcadores al mapa
+      markers1.forEach(function(marker) {
+        // crea un elemento HTML para el marcador
+        var el = document.createElement('div');
+        el.className = 'marker1';
+
+        // crea un marcador en el mapa y lo asigna al elemento HTML creado
+        new mapboxgl.Marker(el)
+          .setLngLat(marker.coordinates)
+          .setPopup(new mapboxgl.Popup({ offset: 25 })
+            .setHTML(marker.content))
+          .addTo(map);
+      });
+
+      markers2.forEach(function(marker) {
+        // crea un elemento HTML para el marcador
+        var el = document.createElement('div');
+        el.className = 'marker2';
+
+        // crea un marcador en el mapa y lo asigna al elemento HTML creado
+        new mapboxgl.Marker(el)
+          .setLngLat(marker.coordinates)
+          .setPopup(new mapboxgl.Popup({ offset: 25 })
+            .setHTML(marker.content))
+          .addTo(map);
+      });
+
+      markers4.forEach(function(marker) {
+        // crea un elemento HTML para el marcador
+        var el = document.createElement('div');
+        el.className = 'marker4';
+
+        // crea un marcador en el mapa y lo asigna al elemento HTML creado
+        new mapboxgl.Marker(el)
+          .setLngLat(marker.coordinates)
+          .setPopup(new mapboxgl.Popup({ offset: 25 })
+            .setHTML(marker.content))
+          .addTo(map);
+      });
+
+       taller.forEach(function(marker) {
+        // crea un elemento HTML para el marcador
+        var el = document.createElement('div');
+        el.className = 'talleres';
+
+        // crea un marcador en el mapa y lo asigna al elemento HTML creado
+        new mapboxgl.Marker(el)
+          .setLngLat(marker.coordinates)
+          .setPopup(new mapboxgl.Popup({ offset: 25 })
+            .setHTML(marker.content))
+          .addTo(map);
+      });
+
+      // Establecer la fecha y hora para la cuenta regresiva (21 de diciembre de 2023 al mediodía, hora peruana)
+      const targetDate = new Date('December 21, 2023 12:00:00 GMT-0500').getTime();
+
+      // Actualizar la cuenta regresiva cada 1 segundo
+      const countdownInterval = setInterval(function () {
+          const currentDate = new Date().getTime();
+          const timeDifference = targetDate - currentDate;
+
+          // Calcular días, horas, minutos y segundos
+          const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+          // Mostrar la cuenta regresiva
+          document.getElementById('countdown-timer').innerHTML =
+              (days < 10 ? '0' : '') + days + 'd ' +
+              (hours < 10 ? '0' : '') + hours + 'h ' +
+              (minutes < 10 ? '0' : '') + minutes + 'm ' +
+              (seconds < 10 ? '0' : '') + seconds + 's ';
+
+          // Verificar si la cuenta regresiva ha terminado
+          if (timeDifference < 0) {
+              clearInterval(countdownInterval);
+              document.getElementById('countdown-timer').innerHTML = '¡Bienvenido!';
+          }
+      }, 1000);
+
+
+
+map.on('style.load', function() {
+  // Coordenadas de la línea
+  var lineCoordinates = [
+    [-76.97382900104682, -12.058563232414103],
+    [-76.96365412703722, -12.05421688033414],
+    [-76.95624575936368, -12.051097921099547],
+    [-76.94553849033683, -12.046834867727169],
+    [-76.93864112019106, -12.044099646537344]
+  ];
+
+  // Agregar la fuente de la línea
+  map.addSource('line', {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: lineCoordinates
+      }
+    }
+  });
+
+  // Agregar la capa de la línea
+  map.addLayer({
+    id: 'line',
+    type: 'line',
+    source: 'line',
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': ['interpolate', ['linear'], ['heatmap-density'],
+        0, 'red',
+        0.2, 'darkred',
+        0.4, 'red',
+        0.6, 'darkred',
+        0.8, 'red',
+        1, 'red'
+      ],
+      'line-width': 5
+    }
+  });
+
+  // Función para cambiar el color de la línea y del círculo cada segundo
+  function changeColors() {
+    var currentColor = map.getPaintProperty('line', 'line-color');
+    var nextColor = currentColor === 'red' ? 'darkred' : 'red';
+    map.setPaintProperty('line', 'line-color', nextColor);
+
+    // Cambiar el color del círculo al mismo tiempo que la línea
+    var statusCircles = document.querySelectorAll('.status-circle');
+    statusCircles.forEach(function(circle) {
+      circle.style.backgroundColor = nextColor;
+    });
+
+    setTimeout(changeColors, 1000);
+  }
+
+  // Iniciar la función de cambio de color
+  changeColors();
+});
+    </script>
+  </body>
+</html>
