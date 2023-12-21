@@ -149,11 +149,11 @@
     <div id="schedule-box">
       <h1>Información Tramo 1A: Línea 2</h1>
       <h2>Estaciones 1A - Línea 2:</h2>
-      <p>E-24 Mercado Santa Anita - No Disponible <span class="status-circle rojo"></span></p>
-      <p>E-23 Hermilio Valdizán - No Disponible <span class="status-circle rojo"></span></p>
-      <p>E-22 Colectora Industrial - No Disponible <span class="status-circle rojo"></span></p>
-      <p>E-21 Óvalo Santa Anita - No Disponible <span class="status-circle rojo"></span></p>
-      <p id="extra-info">E-20 Evitamiento - No Disponible <span class="status-circle rojo"></span></p>
+      <p>E-24 Mercado Santa Anita - En Operativo <span class="status-circle verde"></span></p>
+      <p>E-23 Hermilio Valdizán - En Operativo <span class="status-circle verde"></span></p>
+      <p>E-22 Colectora Industrial - En Operativo <span class="status-circle verde"></span></p>
+      <p>E-21 Óvalo Santa Anita - En Operativo <span class="status-circle verde"></span></p>
+      <p id="extra-info">E-20 Evitamiento - En Operativo <span class="status-circle verde"></span></p>
       <p><a href="https://www.metrolima2.com/" target="_blank">¿Quieres visitar la página web del metro de Lima?</a></p>
 
       <h2>Horarios:</h2>
@@ -611,7 +611,7 @@ map.on('style.load', function() {
   // Función para cambiar el color de la línea y del círculo cada segundo
   function changeColors() {
     var currentColor = map.getPaintProperty('line', 'line-color');
-    var nextColor = currentColor === 'red' ? 'darkred' : 'red';
+    var nextColor = currentColor === 'lime' ? 'darkgreen' : 'lime';
     map.setPaintProperty('line', 'line-color', nextColor);
 
     // Cambiar el color del círculo al mismo tiempo que la línea
